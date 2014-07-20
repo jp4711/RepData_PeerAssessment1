@@ -1,11 +1,25 @@
 # Reproducible Research: Peer Assessment 1
 
 
+### Note - the following packages are needed
+- ggplot2
+- zoo
+
+```{r name="setup"}
+#install.packages("zoo")
+library(ggplot2) 
+library(zoo)
+
+par( mfrow = c( 1, 1 ) )
+
+```
+
 ## Loading and preprocessing the data
 
 ### 1. Load the data (i.e. read.csv())
 
 ```{r}
+
 data <- read.csv("activity.csv");
 summary(data)
 head(data)
@@ -35,7 +49,11 @@ stepsPerInterval <- aggregate(steps ~ interval, data, sum)
 
 ```{r}
 hist(stepsPerDay$steps, breaks=20, main="Histogram of Total Steps per Day",xlab="# of Steps", ylab="Frequency")
+```
 
+```{r, echo=FALSE}
+dev.copy(png,filename="figures/stepsPerDayHist.png");
+#dev.off()
 ```
 
 ### 2. Calculate and report the mean and median total number of steps taken per day
@@ -61,8 +79,13 @@ avgStepsPerDay <- aggregate(steps ~ date, data, mean)
 
 ### Time series plot of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
 
-```{r, echo=FALSE}
+```{r, echo=TRUE}
 plot(avgStepsPerInterval$interval, avgStepsPerInterval$steps, type = "l", main="Avg # of Steps per Interval", xlab="Minute of Day", ylab="# of Steps")
+```
+
+```{r, echo=FALSE}
+dev.copy(png,filename="figures/avgStepsPerInterval.png");
+#dev.off()
 ```
 
 ### Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
@@ -109,8 +132,6 @@ To fill missing value I choose to use zoo package. It has many options to fill i
 Note: please make sure the zoo package is installed.
 
 ```{r}
-#install.packages("zoo")
-library(zoo)
 
 D <- data
 D2 <- do.call(rbind, lapply(split(D, D$interval), na.locf))
@@ -139,7 +160,11 @@ stepsPerIntervalD2 <- aggregate(steps ~ interval, D2, sum)
 
 ```{r}
 hist(stepsPerDayD2$steps, breaks=20, main="Histogram of Total Steps per Day (missing values replaced)",xlab="# of Steps", ylab="Frequency")
+```
 
+```{r, echo=FALSE}
+dev.copy(png,filename="figures/stepsPerDayHistCleanData.png");
+#dev.off()
 ```
 
 ### 2. Calculate and report the mean and median total number of steps taken per day
@@ -188,21 +213,24 @@ D2$DayName[weekdays(D2$date) == "Saturday" | weekdays(D2$date) == "Sunday"] <- "
 D3 <- subset(D2, DayName == "weekday", select=c(steps, date, interval))
 avgStepsPerIntervalD3 <- aggregate(steps ~ interval, D3, mean)  
 D4 <- subset(D2, DayName == "weekend", select=c(steps, date, interval))
-avgStepsPerIntervalD4 <- aggregate(steps ~ interval, D3, mean)  
+avgStepsPerIntervalD4 <- aggregate(steps ~ interval, D4, mean)  
 ```
 
-```
+### Plot 
 
 ```{r, echo=TRUE}
+par( mfrow = c( 2, 1 ) )
 
-plot(avgStepsPerIntervalD3$interval, avgStepsPerIntervalD3$steps, type = "l", main="Avg # of Steps per Interval on weekdays", xlab="Interval", ylab="Number of Steps")
+plot(avgStepsPerIntervalD3$interval, avgStepsPerIntervalD3$steps, type = "h", main="weekend", xlab="", ylab="")
+
+plot(avgStepsPerIntervalD4$interval, avgStepsPerIntervalD4$steps, type = "h", main="weekdays", xlab="", ylab="")
+
+title( "Centered Overall Title", outer = TRUE, xlab="Number of Steps", ylab = "Frequency")
 ```
 
-```{r}
-plot(avgStepsPerIntervalD3$interval, avgStepsPerIntervalD3$steps, type = "l", main="Avg # of Steps per Interval on weekend", xlab="Interval", ylab="Number of Steps")
-
+```{r, echo=FALSE}
+dev.copy(png,filename="figures/avgStepsPerIntervalPerWeekday.png");
 ```
 
 
------
 
